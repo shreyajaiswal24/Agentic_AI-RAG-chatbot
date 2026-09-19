@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/*.pdf
+.DS_Store
+INTERVIEW_PREP.md

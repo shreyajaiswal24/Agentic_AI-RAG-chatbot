@@ -1,0 +1,15 @@
+# Verified against PyPI on 2026-09-19. Pinned to major versions so `pip install`
+# stays reproducible without freezing every transitive dependency.
+langgraph>=1.2,<2
+langchain-core>=1.6,<2
+langchain-openai>=1.6,<2
+langchain-groq>=1.1,<2
+langchain-text-splitters>=1.1,<2
+pinecone>=10,<11
+fastapi>=0.141,<1
+uvicorn[standard]>=0.53
+pypdf>=6,<7
+pydantic-settings>=2.15,<3
+python-dotenv>=1.2
+httpx>=0.28,<1
+pytest>=9,<10

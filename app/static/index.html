@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI eBook Chat</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1c1f23; --muted:#6b7280; --accent:#2563eb; --ok:#16a34a; --warn:#d97706; --border:#e5e7eb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#181b21; --text:#e6e8eb; --muted:#9aa3ad; --border:#2a2f37; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 120px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
+  .samples { display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 20px; }
+  .samples button { border:1px solid var(--border); background:var(--card); color:var(--text); border-radius: 999px; padding: 6px 12px; font-size:.85rem; cursor:pointer; }
+  .samples button:hover { border-color: var(--accent); }
+  .msg { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .msg.q { border-left: 4px solid var(--accent); }
+  .msg .label { font-size:.75rem; text-transform: uppercase; letter-spacing:.05em; color: var(--muted); margin-bottom: 6px; }
+  .answer { white-space: pre-wrap; line-height: 1.5; }
+  .meta { display:flex; flex-wrap:wrap; gap:8px; margin-top: 10px; font-size:.8rem; }
+  .badge { border-radius: 6px; padding: 3px 8px; background: var(--bg); border:1px solid var(--border); }
+  .badge.ok { color: var(--ok); border-color: var(--ok); }
+  .badge.warn { color: var(--warn); border-color: var(--warn); }
+  details { margin-top: 10px; font-size:.85rem; }
+  summary { cursor:pointer; color: var(--muted); }
+  .chunk { border-top:1px solid var(--border); padding: 8px 0; }
+  .chunk .hd { font-weight:600; font-size:.8rem; margin-bottom:4px; }
+  .chunk .tx { color: var(--muted); white-space: pre-wrap; }
+  form { position: fixed; left:0; right:0; bottom:0; background: var(--bg); border-top:1px solid var(--border); padding: 12px 16px; }
+  .row { max-width: 860px; margin:0 auto; display:flex; gap:8px; }
+  input { flex:1; padding: 12px 14px; border:1px solid var(--border); border-radius: 10px; font-size: 1rem; background: var(--card); color: var(--text); }
+  button.send { padding: 12px 18px; border:0; border-radius: 10px; background: var(--accent); color:#fff; font-size:1rem; cursor:pointer; }
+  button.send:disabled { opacity:.6; cursor: default; }
+  .err { color: #dc2626; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Agentic AI eBook Chat</h1>
+  <div class="sub">Answers come only from Konverge AI's <em>Agentic AI: An Executive's Guide</em>. Off-topic questions are refused.</div>
+  <div class="samples" id="samples"></div>
+  <div id="log"></div>
+</div>
+<form id="form">
+  <div class="row">
+    <input id="q" placeholder="Ask a question about the eBook…" autocomplete="off" required minlength="3" maxlength="1000">
+    <button class="send" id="send" type="submit">Ask</button>
+  </div>
+</form>
+<script>
+const SAMPLES = [
+  "What is Agentic AI and how does it differ from traditional AI tools?",
+  "What are the core pillars of an Agentic AI system?",
+  "What challenges do multi-agent systems face and how can they be mitigated?",
+  "Which industries does the eBook give Agentic AI use cases for?",
+  "What is the capital of France?",
+  "Who is the CEO of Konverge AI?",
+];
+const log = document.getElementById("log"), form = document.getElementById("form"),
+      q = document.getElementById("q"), send = document.getElementById("send");
+
+for (const s of SAMPLES) {
+  const b = document.createElement("button"); b.type = "button"; b.textContent = s;
+  b.onclick = () => { q.value = s; form.requestSubmit(); };
+  document.getElementById("samples").appendChild(b);
+}
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function render(body) {
+  const m = el("div", "msg");
+  m.appendChild(el("div", "label", "Answer"));
+  m.appendChild(el("div", "answer", body.answer));
+  const meta = el("div", "meta");
+  meta.appendChild(el("span", "badge " + (body.grounded ? "ok" : "warn"), body.grounded ? "grounded" : "not grounded"));
+  meta.appendChild(el("span", "badge", "route: " + body.route));
+  meta.appendChild(el("span", "badge", "retrieval similarity: " + body.relevance_score.toFixed(3)));
+  const c = body.confidence;
+  const ccls = c.level === "high" ? "ok" : (c.level === "none" ? "" : "warn");
+  meta.appendChild(el("span", "badge " + ccls, `confidence: ${c.score.toFixed(2)} (${c.level}) · ${c.supported_claims}/${c.total_claims} claims supported`));
+  m.appendChild(meta);
+  if (c.reason) { const r = el("div", "sub", "Judge: " + c.reason); r.style.marginTop = "8px"; m.appendChild(r); }
+  const d = el("details");
+  d.appendChild(el("summary", null, `${body.retrieved_chunks.length} retrieved chunks (cosine similarity, not confidence)`));
+  for (const c of body.retrieved_chunks) {
+    const ch = el("div", "chunk");
+    ch.appendChild(el("div", "hd", `${c.chunk_id} · page ${c.page} · score ${c.score.toFixed(3)}`));
+    ch.appendChild(el("div", "tx", c.text));
+    d.appendChild(ch);
+  }
+  m.appendChild(d);
+  return m;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = q.value.trim(); if (!question) return;
+  const qm = el("div", "msg q"); qm.appendChild(el("div", "label", "You")); qm.appendChild(el("div", null, question));
+  log.appendChild(qm);
+  const pending = el("div", "msg", "Thinking…"); log.appendChild(pending);
+  send.disabled = true; q.value = ""; window.scrollTo(0, document.body.scrollHeight);
+  try {
+    const r = await fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) });
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail ? JSON.stringify(body.detail) : r.statusText);
+    log.replaceChild(render(body), pending);
+  } catch (err) {
+    pending.className = "msg err"; pending.textContent = "Error: " + err.message;
+  } finally { send.disabled = false; q.focus(); window.scrollTo(0, document.body.scrollHeight); }
+});
+</script>
+</body>
+</html>
