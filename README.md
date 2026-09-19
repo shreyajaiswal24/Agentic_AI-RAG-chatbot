@@ -4,7 +4,15 @@ A chatbot that answers questions **only** from Konverge AI's eBook
 [*Agentic AI: An Executive's Guide*](https://konverge.ai/pdf/Ebook-Agentic-AI.pdf).
 If the answer is not in the book, it says so instead of guessing.
 
-Built with **Python · LangGraph · Pinecone · Groq LLM · FastAPI**.
+Built with **Python · LangGraph · Pinecone · Groq LLM · FastAPI · Streamlit**.
+
+## 🚀 Live demo
+
+**https://agenticai-rag-chatbot-gvesrewn2te7qp7gzewmv7.streamlit.app/**
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://agenticai-rag-chatbot-gvesrewn2te7qp7gzewmv7.streamlit.app/)
+
+Try the sample questions in the sidebar. Every answer shows whether it was grounded, the retrieval similarity, the confidence score, and the exact book excerpts it came from. (Free hosting — if the app is asleep, it takes ~30 s to wake up.)
 
 ---
 
@@ -42,7 +50,7 @@ Downloads the PDF, cleans and chunks the text, creates the embeddings and stores
 
 Two ways to run it — both use the same LangGraph pipeline.
 
-**A. Streamlit chat app** (what is deployed on Streamlit Community Cloud)
+**A. Streamlit chat app** (this is what the [live demo](https://agenticai-rag-chatbot-gvesrewn2te7qp7gzewmv7.streamlit.app/) runs)
 
 ```bash
 streamlit run streamlit_app.py          # opens http://localhost:8501
