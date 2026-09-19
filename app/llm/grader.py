@@ -14,7 +14,7 @@ from typing import Literal, Protocol
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
-from app.errors import GenerationError
+from app.errors import GenerationError, describe_exception
 from app.llm.prompts import format_context
 from app.retrieval.models import RetrievedChunk
 
@@ -71,7 +71,7 @@ class LLMGrader:
         try:
             grade = self._llm.invoke(messages)
         except Exception as exc:
-            raise GenerationError(f"Answer grading failed: {exc}") from exc
+            raise GenerationError(f"Answer grading failed: {describe_exception(exc)}") from exc
         if not isinstance(grade, AnswerGrade):  # structured output returned None / raw text
             raise GenerationError("Answer grading returned no structured result")
         return grade

@@ -10,7 +10,13 @@ def get_chat_model(settings: Settings) -> BaseChatModel:
     if settings.llm_provider == "groq":
         from langchain_groq import ChatGroq
 
-        return ChatGroq(model=settings.llm_model, api_key=settings.groq_api_key, temperature=settings.llm_temperature)
+        return ChatGroq(
+            model=settings.llm_model,
+            api_key=settings.groq_api_key,
+            temperature=settings.llm_temperature,
+            max_retries=4,   # transient network errors are retried with back-off
+            timeout=60,
+        )
 
     from langchain_openai import ChatOpenAI
 

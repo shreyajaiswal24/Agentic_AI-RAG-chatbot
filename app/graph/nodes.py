@@ -2,7 +2,7 @@
 import logging
 from typing import Protocol
 
-from app.errors import GenerationError
+from app.errors import GenerationError, describe_exception
 from app.graph.state import Confidence, ConfidenceLevel, RAGState, Route
 from app.llm.grader import Grader
 from app.llm.prompts import NOT_FOUND_MESSAGE, build_messages
@@ -54,7 +54,7 @@ class RAGNodes:
         try:
             response = self._llm.invoke(messages)
         except Exception as exc:
-            raise GenerationError(f"LLM call failed: {exc}") from exc
+            raise GenerationError(f"LLM call failed: {describe_exception(exc)}") from exc
 
         answer = str(getattr(response, "content", response)).strip()
         # Second grounding layer: the model was told to use this exact sentence
@@ -90,3 +90,4 @@ def _level(score: float) -> ConfidenceLevel:
     if score >= 0.6:
         return "medium"
     return "low"
+
