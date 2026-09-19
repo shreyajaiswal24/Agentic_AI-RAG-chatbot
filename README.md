@@ -40,6 +40,16 @@ Downloads the PDF, cleans and chunks the text, creates the embeddings and stores
 
 ## 3. Start the chatbot
 
+Two ways to run it — both use the same LangGraph pipeline.
+
+**A. Streamlit chat app** (what is deployed on Streamlit Community Cloud)
+
+```bash
+streamlit run streamlit_app.py          # opens http://localhost:8501
+```
+
+**B. FastAPI server** (JSON API + a small built-in chat page)
+
 ```bash
 uvicorn app.main:app --port 8000
 ```
@@ -133,7 +143,8 @@ app/retrieval/   embeddings + Pinecone vector store
 app/llm/         LLM client, grounding prompt, answer grader
 app/graph/       LangGraph state, nodes, graph
 app/api/         FastAPI routes and schemas
-app/static/      chat UI
+app/static/      chat UI for the FastAPI server
+streamlit_app.py Streamlit chat app (same pipeline, in-process)
 scripts/         ingest.py, sample_queries.py
 tests/           20 unit tests (no keys needed) + 5 integration tests
 ```

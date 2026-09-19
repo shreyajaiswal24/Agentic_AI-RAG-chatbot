@@ -6,3 +6,6 @@ __pycache__/
 data/*.pdf
 .DS_Store
 INTERVIEW_PREP.md
+
+# Streamlit
+.streamlit/secrets.toml
